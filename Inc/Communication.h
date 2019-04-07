@@ -5,6 +5,7 @@
  * @brief   _write() function for printf() and tracer.
  *
  *          Copyright (c) 2018 Ferenc Nemeth - https://github.com/ferenc-nemeth
+ *          Copyright (c) 2019 Vadym Mishchuk - https://github.com/vad32m
  */
 
 #ifndef COMMUNICATION_H_

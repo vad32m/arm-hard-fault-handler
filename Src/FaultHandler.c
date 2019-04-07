@@ -12,6 +12,7 @@
  *          - Stop the execution with a breakpoint.
  *
  *          Copyright (c) 2018 Ferenc Nemeth - https://github.com/ferenc-nemeth
+ *          Copyright (c) 2019 Vadym Mishchuk - https://github.com/vad32m
  */
 
 #include "FaultHandler.h"
