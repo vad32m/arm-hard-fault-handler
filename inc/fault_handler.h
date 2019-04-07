@@ -18,8 +18,7 @@
 #ifndef FAULTHANDLER_H_
 #define FAULTHANDLER_H_
 
-#include "stm32f10x.h"
-#include "Communication.h"
+#include "fault_handler.h"
 
 /* Bit masking. */
 #define CHECK_BIT(REG, POS) ((REG) & (1u << (POS)))

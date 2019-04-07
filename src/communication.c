@@ -7,8 +7,12 @@
  *          Copyright (c) 2018 Ferenc Nemeth - https://github.com/ferenc-nemeth
  *          Copyright (c) 2019 Vadym Mishchuk - https://github.com/vad32m
  */
+#include <stdint.h>
 
-#include "Communication.h"
+#include <libopencm3/cm3/itm.h>
+#include <libopencm3/cm3/scb.h>
+
+#include "fault_handler.h"
 
 /**
  * @brief   This is needed by printf().
@@ -21,7 +25,9 @@ int _write(int file, char *data, int len)
 {
   for (uint16_t i = 0u; i < len; i++)
   {
-    ITM_SendChar(data[i]);
+      while (!(ITM_STIM8(0) & ITM_STIM_FIFOREADY)) {}
+
+	    ITM_STIM8(0) = data[i];
   }
 
   return len;

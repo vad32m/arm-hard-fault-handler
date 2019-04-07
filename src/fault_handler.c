@@ -15,7 +15,10 @@
  *          Copyright (c) 2019 Vadym Mishchuk - https://github.com/vad32m
  */
 
-#include "FaultHandler.h"
+#include "fault_handler.h"
+
+#include <libopencm3/cm3/scb.h>
+#include <stdint.h>
 
 /* Local function. */
 void ReportHardFault(uint32_t *hard_fault_values, uint32_t exc);
@@ -57,11 +60,11 @@ void ReportHardFault(uint32_t *stack_frame, uint32_t exc)
   uint32_t lr   = stack_frame[5];
   uint32_t pc   = stack_frame[6];
   uint32_t psr  = stack_frame[7];
-  uint32_t hfsr = SCB->HFSR;
-  uint32_t cfsr = SCB->CFSR;
-  uint32_t mmar = SCB->MMFAR;
-  uint32_t bfar = SCB->BFAR;
-  uint32_t afsr = SCB->AFSR;
+  uint32_t hfsr = SCB_HFSR;
+  uint32_t cfsr = SCB_CFSR;
+  uint32_t mmar = SCB_MMFAR;
+  uint32_t bfar = SCB_BFAR;
+  uint32_t afsr = SCB_AFSR;
 
   printf("\n!!!Hard Fault detected!!!\n");
 

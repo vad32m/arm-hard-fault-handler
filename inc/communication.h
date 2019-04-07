@@ -11,7 +11,6 @@
 #ifndef COMMUNICATION_H_
 #define COMMUNICATION_H_
 
-#include "stm32f10x.h"
 #include <stdio.h>
 
 int _write(int file, char *ptr, int len);
