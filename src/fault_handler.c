@@ -181,7 +181,7 @@ void ReportHardFault(uint32_t *stack_frame, uint32_t exc)
   {
     printf(" - Attempted to execute an instruction that makes illegal use of the EPSR.\n");
   }
-  if (CHECK_BIT(cfsr, INVSTATE))
+  if (CHECK_BIT(cfsr, UNDEFINSTR))
   {
     printf(" - The processor has attempted to execute an undefined instruction.\n");
   }
