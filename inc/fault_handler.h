@@ -18,7 +18,7 @@
 #ifndef FAULTHANDLER_H_
 #define FAULTHANDLER_H_
 
-#include "fault_handler.h"
+#include <stdint.h>
 
 /* Bit masking. */
 #define CHECK_BIT(REG, POS) ((REG) & (1u << (POS)))
@@ -52,8 +52,25 @@
 #define INVSTATE            ((uint8_t)17u)
 #define UNDEFINSTR          ((uint8_t)16u)
 
-/* Global function. */
-void HardFault_Handler(void);
+void ReportStackUsage(uint32_t *stack_frame, uint32_t exc);
+
+void ReportMemanageFault(void);
+
+void ReportBusFault(void);
+
+void ReportUsageFault(void);
+
+void ReportHardFault(void);
+
+#define REPORT_STACK_FRAME	 __asm volatile \
+                ( \
+  	                "TST    LR, #0b0100;      " \
+  	                "ITE    EQ;               " \
+ 	                "MRSEQ  R0, MSP;          " \
+                    "MRSNE  R0, PSP;          " \
+                    "MOV    R1, LR;           " \
+                    "BL     ReportStackUsage; " \
+                );
 
 #endif /* FAULTHANDLER_H_ */
 
