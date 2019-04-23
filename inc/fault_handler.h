@@ -52,16 +52,39 @@
 #define INVSTATE            ((uint8_t)17u)
 #define UNDEFINSTR          ((uint8_t)16u)
 
+/**
+ * @brief   Prints the registers and gives detailed information about the error(s).
+ * Should be invked from REPORT_STACK_FRAME macro.
+ * @param   *stack_frame: Stack frame registers (R0-R3, R12, LR, LC, PSR).
+ * @param   exc: EXC_RETURN register.
+ * @return  void
+ */
 void ReportStackUsage(uint32_t *stack_frame, uint32_t exc);
 
+/**
+ * @brief  Print data about CFSR bits that relevant to memory management fault
+ */
 void ReportMemanageFault(void);
 
+/**
+ * @brief  Print data about CFSR bits that relevant to bus fault
+ */
 void ReportBusFault(void);
 
+/**
+ * @brief  Print data about CFSR bits that relevant to usage fault
+ */
 void ReportUsageFault(void);
 
+/**
+ * @brief  Print data about HFSR bits
+ */
 void ReportHardFault(void);
 
+/**
+ * @brief Macro that should be called to report stack frame
+ * and processor status register 
+ */
 #define REPORT_STACK_FRAME	 __asm volatile \
                 ( \
   	                "TST    LR, #0b0100;      " \

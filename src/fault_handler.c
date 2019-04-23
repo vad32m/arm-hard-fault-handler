@@ -21,12 +21,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-/**
- * @brief   Prints the registers and gives detailed information about the error(s).
- * @param   *stack_frame: Stack frame registers (R0-R3, R12, LR, LC, PSR).
- * @param   exc: EXC_RETURN register.
- * @return  void
- */
+
 void ReportStackUsage(uint32_t *stack_frame, uint32_t exc)
 {
   uint32_t r0   = stack_frame[0];
