@@ -17,8 +17,6 @@
 
 #include "fault_config.h"
 
-#include <libopencm3/cm3/scb.h>
-#include <libopencm3/cm3/scs.h>
 #include <stdint.h>
 
 /**
@@ -35,9 +33,19 @@
                     "BL     ReportStackUsage; " \
                 );
 
-
 /* Bit masking. */
 #define CHECK_BIT(REG, POS) ((REG) & (1u << (POS)))
+
+/* Registers */
+#define HFSR         (*((uint32_t*)0xe000ed2c))
+#define CFSR         (*((uint32_t*)0xe000ed28))
+#define MMFAR        (*((uint32_t*)0xe000ed34))
+#define BFAR         (*((uint32_t*)0xe000ed38))
+#define AFSR         (*((uint32_t*)0xe000ed3c))
+#define DHCSR        (*((uint32_t*)0xe000edf0))
+
+/* Debug Halting Control and Status Register */
+#define DEBUGEN             ((uint8_t)1u)
 
 /* Hard Fault Status Register. */
 #define FORCED              ((uint8_t)30u)
@@ -109,7 +117,7 @@ ReportHardFault(void);
 static inline void
 HaltExecution(void)
 {
-    if (SCS_DHCSR & SCS_DHCSR_C_DEBUGEN) {
+    if (CHECK_BIT(DEBUGEN, DHCSR)) {
         /* Breakpoint if debugger is connected */
         __asm volatile("BKPT #0");
     }
@@ -184,11 +192,11 @@ ReportStackUsage(uint32_t *stack_frame, uint32_t exc)
   uint32_t lr   = stack_frame[5];
   uint32_t pc   = stack_frame[6];
   uint32_t psr  = stack_frame[7];
-  uint32_t hfsr = SCB_HFSR;
-  uint32_t cfsr = SCB_CFSR;
-  uint32_t mmar = SCB_MMFAR;
-  uint32_t bfar = SCB_BFAR;
-  uint32_t afsr = SCB_AFSR;
+  uint32_t hfsr = HFSR;
+  uint32_t cfsr = CFSR;
+  uint32_t mmar = MMFAR;
+  uint32_t bfar = BFAR;
+  uint32_t afsr = AFSR;
   FAULT_PRINTLN("!!!Fault detected!!!");
 
   FAULT_PRINTLN("Stack frame:");
@@ -215,7 +223,7 @@ ReportStackUsage(uint32_t *stack_frame, uint32_t exc)
 static void
 ReportMemanageFault(void)
 {
-    uint32_t cfsr = SCB_CFSR;
+    uint32_t cfsr = CFSR;
 
     FAULT_PRINTLN("MemManage fault status:");
 
@@ -249,7 +257,7 @@ ReportMemanageFault(void)
 static void
 ReportBusFault(void)
 {
-    uint32_t cfsr = SCB_CFSR;
+    uint32_t cfsr = CFSR;
 
     FAULT_PRINTLN("Bus fault status:\n");
 
@@ -287,7 +295,7 @@ ReportBusFault(void)
 static void
 ReportUsageFault(void)
 {
-    uint32_t cfsr = SCB_CFSR;
+    uint32_t cfsr = CFSR;
 
     FAULT_PRINTLN("Usage fault status:");
 
@@ -319,7 +327,7 @@ ReportUsageFault(void)
 static void
 ReportHardFault(void)
 {
-    uint32_t hfsr = SCB_HFSR;
+    uint32_t hfsr = HFSR;
 
     FAULT_PRINTLN("Hard fault status:");
 
