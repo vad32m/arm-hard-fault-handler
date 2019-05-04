@@ -110,12 +110,12 @@ static inline void
 HaltExecution(void)
 {
     if (SCS_DHCSR & SCS_DHCSR_C_DEBUGEN) {
-        /* Breakpoint. */
+        /* Breakpoint if debugger is connected */
         __asm volatile("BKPT #0");
-    } else {
-        /* Infinite loop to stop the execution. */
-        while(1);
     }
+    /* Infinite loop to stop the execution. */
+    while(1);
+
 }
 
 #ifdef MEMMANAGE_FAULT_SYMBOL
@@ -124,6 +124,9 @@ MEMMANAGE_FAULT_SYMBOL(void)
 {
     REPORT_STACK_FRAME
     ReportMemanageFault();
+#ifdef MEMMANAGE_FAULT_HOOK
+    MEMMEMMANAGE_FAULT_HOOK()
+#endif
     HaltExecution();
 }
 #endif
@@ -137,6 +140,9 @@ HARD_FAULT_SYMBOL(void)
     ReportBusFault();
     ReportUsageFault();
     ReportHardFault();
+#ifdef HARD_FAULT_HOOK
+    HARD_FAULT_HOOK()
+#endif
     HaltExecution();
 }
 #endif
@@ -147,6 +153,9 @@ BUS_FAULT_SYMBOL(void)
 {
     REPORT_STACK_FRAME
     ReportBusFault();
+#ifdef BUS_FAULT_HOOK
+    BUS_FAULT_HOOK()
+#endif
     HaltExecution();
 }
 #endif
@@ -157,6 +166,9 @@ USAGE_FAULT_SYMBOL(void)
 {
     REPORT_STACK_FRAME
     ReportUsageFault();
+#ifdef USAGE_FAULT_HOOK
+    USAGE_FAULT_HOOK()
+#endif
     HaltExecution();
 }
 #endif
