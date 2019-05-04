@@ -20,7 +20,6 @@
 #include <libopencm3/cm3/scb.h>
 #include <libopencm3/cm3/scs.h>
 #include <stdint.h>
-#include <stdio.h>
 
 /**
  * @brief Macro that should be called to report stack frame
@@ -178,27 +177,27 @@ ReportStackUsage(uint32_t *stack_frame, uint32_t exc)
   uint32_t mmar = SCB_MMFAR;
   uint32_t bfar = SCB_BFAR;
   uint32_t afsr = SCB_AFSR;
-  printf("\n!!!Fault detected!!!\n");
+  FAULT_PRINTLN("!!!Fault detected!!!");
 
-  printf("\nStack frame:\n");
-  printf("R0 :        0x%08lX\n", r0);
-  printf("R1 :        0x%08lX\n", r1);
-  printf("R2 :        0x%08lX\n", r2);
-  printf("R3 :        0x%08lX\n", r3);
-  printf("R12:        0x%08lX\n", r12);
-  printf("LR :        0x%08lX\n", lr);
-  printf("PC :        0x%08lX\n", pc);
-  printf("PSR:        0x%08lX\n", psr);
+  FAULT_PRINTLN("Stack frame:");
+  FAULT_PRINT("R0 :    "); FAULT_PRINT_HEX(r0); FAULT_NEWLINE();
+  FAULT_PRINT("R1 :    "); FAULT_PRINT_HEX(r1); FAULT_NEWLINE();
+  FAULT_PRINT("R2 :    "); FAULT_PRINT_HEX(r2); FAULT_NEWLINE();
+  FAULT_PRINT("R3 :    "); FAULT_PRINT_HEX(r3); FAULT_NEWLINE();
+  FAULT_PRINT("R12:    "); FAULT_PRINT_HEX(r12); FAULT_NEWLINE();
+  FAULT_PRINT("LR :    "); FAULT_PRINT_HEX(lr); FAULT_NEWLINE();
+  FAULT_PRINT("PC :    "); FAULT_PRINT_HEX(pc); FAULT_NEWLINE();
+  FAULT_PRINT("PSR:    "); FAULT_PRINT_HEX(psr); FAULT_NEWLINE();
 
-  printf("\nFault status:\n");
-  printf("HFSR:       0x%08lX\n", hfsr);
-  printf("CFSR:       0x%08lX\n", cfsr);
-  printf("MMAR:       0x%08lX\n", mmar);
-  printf("BFAR:       0x%08lX\n", bfar);
-  printf("AFSR:       0x%08lX\n", afsr);
+  FAULT_PRINTLN("Fault status:");
+  FAULT_PRINT("HFSR:    "); FAULT_PRINT_HEX(hfsr); FAULT_NEWLINE();
+  FAULT_PRINT("CFSR:    "); FAULT_PRINT_HEX(cfsr); FAULT_NEWLINE();
+  FAULT_PRINT("MMAR:    "); FAULT_PRINT_HEX(mmar); FAULT_NEWLINE();
+  FAULT_PRINT("BFAR:    "); FAULT_PRINT_HEX(bfar); FAULT_NEWLINE();
+  FAULT_PRINT("AFSR:    "); FAULT_PRINT_HEX(afsr); FAULT_NEWLINE();
 
-  printf("\nOther:\n");
-  printf("EXC_RETURN: 0x%08lX\n", exc);
+  FAULT_PRINTLN("Other:");
+  FAULT_PRINT("EXC_RETURN: "); FAULT_PRINT_HEX(exc); FAULT_NEWLINE();
 }
 
 static void
@@ -206,32 +205,32 @@ ReportMemanageFault(void)
 {
     uint32_t cfsr = SCB_CFSR;
 
-    printf("MemManage fault status:\n");
+    FAULT_PRINTLN("MemManage fault status:");
 
     if (CHECK_BIT(cfsr, MMARVALID)) {
-        printf(" - MMAR holds a valid address.\n");
+        FAULT_PRINTLN(" - MMAR holds a valid address.");
     } else {
-        printf(" - MMAR holds an invalid address.\n");
+        FAULT_PRINTLN(" - MMAR holds an invalid address.");
     }
 
     if (CHECK_BIT(cfsr, MLSPERR)) {
-        printf(" - Fault occurred during floating-point lazy state preservation.\n");
+        FAULT_PRINTLN(" - Fault occurred during floating-point lazy state preservation.");
     }
 
     if (CHECK_BIT(cfsr, MSTKERR)) {
-        printf(" - Stacking has caused an access violation.\n");
+        FAULT_PRINTLN(" - Stacking has caused an access violation.");
     }
 
     if (CHECK_BIT(cfsr, MUNSTKERR)) {
-        printf(" - Unstacking has caused an access violation.\n");
+        FAULT_PRINTLN(" - Unstacking has caused an access violation.");
     }
 
     if (CHECK_BIT(cfsr, DACCVIOL)) {
-        printf(" - Load or store at a location that does not permit the operation.\n");
+        FAULT_PRINTLN(" - Load or store at a location that does not permit the operation.");
     }
 
     if (CHECK_BIT(cfsr, IACCVIOL)) {
-        printf(" - Instruction fetch from a location that does not permit execution.\n");
+        FAULT_PRINTLN(" - Instruction fetch from a location that does not permit execution.");
     }
 }
 
@@ -240,36 +239,36 @@ ReportBusFault(void)
 {
     uint32_t cfsr = SCB_CFSR;
 
-    printf("Bus fault status:\n");
+    FAULT_PRINTLN("Bus fault status:\n");
 
     if (CHECK_BIT(cfsr, BFARVALID)) {
-        printf(" - BFAR holds a valid address.\n");
+        FAULT_PRINTLN(" - BFAR holds a valid address.");
     } else {
-        printf(" - BFAR holds an invalid address.\n");
+        FAULT_PRINTLN(" - BFAR holds an invalid address.");
     }
 
     if (CHECK_BIT(cfsr, LSPERR)) {
-        printf(" - Fault occurred during floating-point lazy state preservation.\n");
+        FAULT_PRINTLN(" - Fault occurred during floating-point lazy state preservation.");
     }
 
     if (CHECK_BIT(cfsr, STKERR)) {
-        printf(" - Stacking has caused a Bus fault.\n");
+        FAULT_PRINTLN(" - Stacking has caused a Bus fault.");
     }
 
     if (CHECK_BIT(cfsr, UNSTKERR)) {
-        printf(" - Unstacking has caused a Bus fault.\n");
+        FAULT_PRINTLN(" - Unstacking has caused a Bus fault.");
     }
 
     if (CHECK_BIT(cfsr, IMPRECISERR)) {
-        printf(" - Data bus error has occurred, but the return address in the stack is not related to the fault.\n");
+        FAULT_PRINTLN(" - Data bus error has occurred, but the return address in the stack is not related to the fault.");
     }
 
     if (CHECK_BIT(cfsr, PRECISERR)) {
-        printf(" - Data bus error has occurred, and the return address points to the instruction that caused the fault.\n");
+        FAULT_PRINTLN(" - Data bus error has occurred, and the return address points to the instruction that caused the fault.");
     }
 
     if (CHECK_BIT(cfsr, IBUSERR)) {
-        printf(" - Instruction bus error.\n");
+        FAULT_PRINTLN(" - Instruction bus error.");
     }
 }
 
@@ -278,30 +277,30 @@ ReportUsageFault(void)
 {
     uint32_t cfsr = SCB_CFSR;
 
-    printf("Usage fault status:\n");
+    FAULT_PRINTLN("Usage fault status:");
 
     if (CHECK_BIT(cfsr, DIVBYZERO)) {
-        printf(" - The processor has executed an SDIV or UDIV instruction with a divisor of 0.\n");
+        FAULT_PRINTLN(" - The processor has executed an SDIV or UDIV instruction with a divisor of 0.");
     }
 
     if (CHECK_BIT(cfsr, UNALIGNED)) {
-        printf(" - The processor has made an unaligned memory access.\n");
+        FAULT_PRINTLN(" - The processor has made an unaligned memory access.");
     }
 
     if (CHECK_BIT(cfsr, NOCP)) {
-        printf(" - Attempted to access a coprocessor.\n");
+        FAULT_PRINTLN(" - Attempted to access a coprocessor.");
     }
 
     if (CHECK_BIT(cfsr, INVPC)) {
-        printf(" - Illegal attempt to load of EXC_RETURN to the PC.\n");
+        FAULT_PRINTLN(" - Illegal attempt to load of EXC_RETURN to the PC.");
     }
 
     if (CHECK_BIT(cfsr, INVSTATE)) {
-        printf(" - Attempted to execute an instruction that makes illegal use of the EPSR.\n");
+        FAULT_PRINTLN(" - Attempted to execute an instruction that makes illegal use of the EPSR.");
     }
 
     if (CHECK_BIT(cfsr, UNDEFINSTR)) {
-        printf(" - The processor has attempted to execute an undefined instruction.\n");
+        FAULT_PRINTLN(" - The processor has attempted to execute an undefined instruction.");
     }
 }
 
@@ -310,16 +309,13 @@ ReportHardFault(void)
 {
     uint32_t hfsr = SCB_HFSR;
 
-    printf("\nDetails of the fault status:\n");
-    printf("Hard fault status:\n");
+    FAULT_PRINTLN("Hard fault status:");
 
-    if (CHECK_BIT(hfsr, FORCED))
-    {
-        printf(" - Forced Hard fault.\n");
+    if (CHECK_BIT(hfsr, FORCED)) {
+        FAULT_PRINTLN(" - Forced Hard fault.");
     }
 
-    if (CHECK_BIT(hfsr, VECTTBL))
-    {
-        printf(" - Bus fault on vector table read.\n");
+    if (CHECK_BIT(hfsr, VECTTBL)) {
+        FAULT_PRINTLN(" - Bus fault on vector table read.");
     }
 }
