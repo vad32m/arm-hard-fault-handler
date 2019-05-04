@@ -18,8 +18,56 @@
 #include "fault_config.h"
 
 #include <libopencm3/cm3/scb.h>
+#include <libopencm3/cm3/scs.h>
 #include <stdint.h>
 #include <stdio.h>
+
+/**
+ * @brief Macro that should be called to report stack frame
+ * and processor status register 
+ */
+#define REPORT_STACK_FRAME	 __asm volatile \
+                ( \
+  	                "TST    LR, #0b0100;      " \
+  	                "ITE    EQ;               " \
+ 	                "MRSEQ  R0, MSP;          " \
+                    "MRSNE  R0, PSP;          " \
+                    "MOV    R1, LR;           " \
+                    "BL     ReportStackUsage; " \
+                );
+
+
+/* Bit masking. */
+#define CHECK_BIT(REG, POS) ((REG) & (1u << (POS)))
+
+/* Hard Fault Status Register. */
+#define FORCED              ((uint8_t)30u)
+#define VECTTBL             ((uint8_t)1u)
+
+/* MemManage Fault Status Register (MMFSR; 0-7 bits in CFSR). */
+#define MMARVALID           ((uint8_t)7u)
+#define MLSPERR             ((uint8_t)5u)   /**< Only on ARM Cortex-M4F. */
+#define MSTKERR             ((uint8_t)4u)
+#define MUNSTKERR           ((uint8_t)3u)
+#define DACCVIOL            ((uint8_t)1u)
+#define IACCVIOL            ((uint8_t)0u)
+
+/* Bus Fault Status Register (BFSR; 8-15 bits in CFSR). */
+#define BFARVALID           ((uint8_t)15u)
+#define LSPERR              ((uint8_t)13u)  /**< Only on ARM Cortex-M4F. */
+#define STKERR              ((uint8_t)12u)
+#define UNSTKERR            ((uint8_t)11u)
+#define IMPRECISERR         ((uint8_t)10u)
+#define PRECISERR           ((uint8_t)9u)
+#define IBUSERR             ((uint8_t)8u)
+
+/* Usage Fault Status Register (BFSR; 16-25 bits in CFSR). */
+#define DIVBYZERO           ((uint8_t)25u)  /**< Has to be enabled in CCR. */
+#define UNALIGNED           ((uint8_t)24u)  /**< Has to be enabled in CCR. */
+#define NOCP                ((uint8_t)19u)
+#define INVPC               ((uint8_t)18u)
+#define INVSTATE            ((uint8_t)17u)
+#define UNDEFINSTR          ((uint8_t)16u)
 
 /**
  * @brief   Prints the registers and gives detailed information about the error(s).
@@ -56,50 +104,20 @@ static void
 ReportHardFault(void);
 
 /**
- * @brief Macro that should be called to report stack frame
- * and processor status register 
+ * @brief Trigger breakpoint if debugger is connected.
+ * Infinite loop if no debugger connected.
  */
-#define REPORT_STACK_FRAME	 __asm volatile \
-                ( \
-  	                "TST    LR, #0b0100;      " \
-  	                "ITE    EQ;               " \
- 	                "MRSEQ  R0, MSP;          " \
-                    "MRSNE  R0, PSP;          " \
-                    "MOV    R1, LR;           " \
-                    "BL     ReportStackUsage; " \
-                );
-
-/* Bit masking. */
-#define CHECK_BIT(REG, POS) ((REG) & (1u << (POS)))
-
-/* Hard Fault Status Register. */
-#define FORCED              ((uint8_t)30u)
-#define VECTTBL             ((uint8_t)1u)
-
-/* MemManage Fault Status Register (MMFSR; 0-7 bits in CFSR). */
-#define MMARVALID           ((uint8_t)7u)
-#define MLSPERR             ((uint8_t)5u)   /**< Only on ARM Cortex-M4F. */
-#define MSTKERR             ((uint8_t)4u)
-#define MUNSTKERR           ((uint8_t)3u)
-#define DACCVIOL            ((uint8_t)1u)
-#define IACCVIOL            ((uint8_t)0u)
-
-/* Bus Fault Status Register (BFSR; 8-15 bits in CFSR). */
-#define BFARVALID           ((uint8_t)15u)
-#define LSPERR              ((uint8_t)13u)  /**< Only on ARM Cortex-M4F. */
-#define STKERR              ((uint8_t)12u)
-#define UNSTKERR            ((uint8_t)11u)
-#define IMPRECISERR         ((uint8_t)10u)
-#define PRECISERR           ((uint8_t)9u)
-#define IBUSERR             ((uint8_t)8u)
-
-/* Usage Fault Status Register (BFSR; 16-25 bits in CFSR). */
-#define DIVBYZERO           ((uint8_t)25u)  /**< Has to be enabled in CCR. */
-#define UNALIGNED           ((uint8_t)24u)  /**< Has to be enabled in CCR. */
-#define NOCP                ((uint8_t)19u)
-#define INVPC               ((uint8_t)18u)
-#define INVSTATE            ((uint8_t)17u)
-#define UNDEFINSTR          ((uint8_t)16u)
+static inline void
+HaltExecution(void)
+{
+    if (SCS_DHCSR & SCS_DHCSR_C_DEBUGEN) {
+        /* Breakpoint. */
+        __asm volatile("BKPT #0");
+    } else {
+        /* Infinite loop to stop the execution. */
+        while(1);
+    }
+}
 
 #ifdef MEMMANAGE_FAULT_SYMBOL
 void
@@ -107,6 +125,7 @@ MEMMANAGE_FAULT_SYMBOL(void)
 {
     REPORT_STACK_FRAME
     ReportMemanageFault();
+    HaltExecution();
 }
 #endif
 
@@ -119,6 +138,7 @@ HARD_FAULT_SYMBOL(void)
     ReportBusFault();
     ReportUsageFault();
     ReportHardFault();
+    HaltExecution();
 }
 #endif
 
@@ -128,6 +148,7 @@ BUS_FAULT_SYMBOL(void)
 {
     REPORT_STACK_FRAME
     ReportBusFault();
+    HaltExecution();
 }
 #endif
 
@@ -137,6 +158,7 @@ USAGE_FAULT_SYMBOL(void)
 {
     REPORT_STACK_FRAME
     ReportUsageFault();
+    HaltExecution();
 }
 #endif
 
@@ -182,8 +204,8 @@ ReportStackUsage(uint32_t *stack_frame, uint32_t exc)
 static void
 ReportMemanageFault(void)
 {
-
     uint32_t cfsr = SCB_CFSR;
+
     printf("MemManage fault status:\n");
 
     if (CHECK_BIT(cfsr, MMARVALID)) {
@@ -211,18 +233,13 @@ ReportMemanageFault(void)
     if (CHECK_BIT(cfsr, IACCVIOL)) {
         printf(" - Instruction fetch from a location that does not permit execution.\n");
     }
-
-    /* Breakpoint. */
-    __asm volatile("BKPT #0");
-
-    /* Infinite loop to stop the execution. */
-    while(1);
 }
 
 static void
 ReportBusFault(void)
 {
     uint32_t cfsr = SCB_CFSR;
+
     printf("Bus fault status:\n");
 
     if (CHECK_BIT(cfsr, BFARVALID)) {
@@ -254,18 +271,13 @@ ReportBusFault(void)
     if (CHECK_BIT(cfsr, IBUSERR)) {
         printf(" - Instruction bus error.\n");
     }
-
-    /* Breakpoint. */
-    __asm volatile("BKPT #0");
-
-    /* Infinite loop to stop the execution. */
-    while(1);
 }
 
 static void
 ReportUsageFault(void)
 {
     uint32_t cfsr = SCB_CFSR;
+
     printf("Usage fault status:\n");
 
     if (CHECK_BIT(cfsr, DIVBYZERO)) {
@@ -291,12 +303,6 @@ ReportUsageFault(void)
     if (CHECK_BIT(cfsr, UNDEFINSTR)) {
         printf(" - The processor has attempted to execute an undefined instruction.\n");
     }
-
-    /* Breakpoint. */
-    __asm volatile("BKPT #0");
-
-    /* Infinite loop to stop the execution. */
-    while (1);
 }
 
 static void
@@ -316,10 +322,4 @@ ReportHardFault(void)
     {
         printf(" - Bus fault on vector table read.\n");
     }
-
-    /* Breakpoint. */
-    __asm volatile("BKPT #0");
-
-    /* Infinite loop to stop the execution. */
-    while(1);
 }
