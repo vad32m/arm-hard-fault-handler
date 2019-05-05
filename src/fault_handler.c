@@ -43,6 +43,10 @@
 #define BFAR         (*((uint32_t*)0xe000ed38))
 #define AFSR         (*((uint32_t*)0xe000ed3c))
 #define DHCSR        (*((uint32_t*)0xe000edf0))
+#define AIRCR        (*((uint32_t*)0xe000ed0c))
+
+/* Application Interrupt and Reset Control Register */
+#define AIRCR_RESETREQ      ((uint32_t)0x05fa0040)
 
 /* Debug Halting Control and Status Register */
 #define DEBUGEN             ((uint8_t)1u)
@@ -117,14 +121,22 @@ ReportHardFault(void);
 static inline void
 HaltExecution(void)
 {
-    if (CHECK_BIT(DEBUGEN, DHCSR)) {
-        /* Breakpoint if debugger is connected */
-        __asm volatile("BKPT #0");
-    }
+#ifdef FAULT_BREAKPOINT
+    /* Breakpoint*/
+    __asm volatile("BKPT #0");
+#endif
+
+#ifdef FAULT_REBOOT
+    /* Reboot system */
+    AIRCR = AIRCR_RESETREQ;
+#endif
+
+#ifdef FAULT_STOP
     /* Infinite loop to stop the execution. */
     while(1);
-
+#endif
 }
+
 
 #ifdef MEMMANAGE_FAULT_SYMBOL
 void
@@ -133,7 +145,7 @@ MEMMANAGE_FAULT_SYMBOL(void)
     REPORT_STACK_FRAME
     ReportMemanageFault();
 #ifdef MEMMANAGE_FAULT_HOOK
-    MEMMEMMANAGE_FAULT_HOOK()
+    MEMMANAGE_FAULT_HOOK()
 #endif
     HaltExecution();
 }
