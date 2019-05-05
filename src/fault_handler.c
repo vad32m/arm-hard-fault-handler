@@ -192,40 +192,40 @@ USAGE_FAULT_SYMBOL(void)
 void
 report_stack_usage(uint32_t *stack_frame, uint32_t exc)
 {
-  uint32_t r0   = stack_frame[0];
-  uint32_t r1   = stack_frame[1];
-  uint32_t r2   = stack_frame[2];
-  uint32_t r3   = stack_frame[3];
-  uint32_t r12  = stack_frame[4];
-  uint32_t lr   = stack_frame[5];
-  uint32_t pc   = stack_frame[6];
-  uint32_t psr  = stack_frame[7];
-  uint32_t hfsr = HFSR;
-  uint32_t cfsr = CFSR;
-  uint32_t mmar = MMFAR;
-  uint32_t bfar = BFAR;
-  uint32_t afsr = AFSR;
-  FAULT_PRINTLN("!!!Fault detected!!!");
+    uint32_t r0   = stack_frame[0];
+    uint32_t r1   = stack_frame[1];
+    uint32_t r2   = stack_frame[2];
+    uint32_t r3   = stack_frame[3];
+    uint32_t r12  = stack_frame[4];
+    uint32_t lr   = stack_frame[5];
+    uint32_t pc   = stack_frame[6];
+    uint32_t psr  = stack_frame[7];
+    uint32_t hfsr = HFSR;
+    uint32_t cfsr = CFSR;
+    uint32_t mmar = MMFAR;
+    uint32_t bfar = BFAR;
+    uint32_t afsr = AFSR;
+    FAULT_PRINTLN("!!!Fault detected!!!");
 
-  FAULT_PRINTLN("Stack frame:");
-  FAULT_PRINT("R0 :    "); FAULT_PRINT_HEX(r0); FAULT_NEWLINE();
-  FAULT_PRINT("R1 :    "); FAULT_PRINT_HEX(r1); FAULT_NEWLINE();
-  FAULT_PRINT("R2 :    "); FAULT_PRINT_HEX(r2); FAULT_NEWLINE();
-  FAULT_PRINT("R3 :    "); FAULT_PRINT_HEX(r3); FAULT_NEWLINE();
-  FAULT_PRINT("R12:    "); FAULT_PRINT_HEX(r12); FAULT_NEWLINE();
-  FAULT_PRINT("LR :    "); FAULT_PRINT_HEX(lr); FAULT_NEWLINE();
-  FAULT_PRINT("PC :    "); FAULT_PRINT_HEX(pc); FAULT_NEWLINE();
-  FAULT_PRINT("PSR:    "); FAULT_PRINT_HEX(psr); FAULT_NEWLINE();
+    FAULT_PRINTLN("Stack frame:");
+    FAULT_PRINT("R0 :    "); FAULT_PRINT_HEX(r0); FAULT_NEWLINE();
+    FAULT_PRINT("R1 :    "); FAULT_PRINT_HEX(r1); FAULT_NEWLINE();
+    FAULT_PRINT("R2 :    "); FAULT_PRINT_HEX(r2); FAULT_NEWLINE();
+    FAULT_PRINT("R3 :    "); FAULT_PRINT_HEX(r3); FAULT_NEWLINE();
+    FAULT_PRINT("R12:    "); FAULT_PRINT_HEX(r12); FAULT_NEWLINE();
+    FAULT_PRINT("LR :    "); FAULT_PRINT_HEX(lr); FAULT_NEWLINE();
+    FAULT_PRINT("PC :    "); FAULT_PRINT_HEX(pc); FAULT_NEWLINE();
+    FAULT_PRINT("PSR:    "); FAULT_PRINT_HEX(psr); FAULT_NEWLINE();
 
-  FAULT_PRINTLN("Fault status:");
-  FAULT_PRINT("HFSR:    "); FAULT_PRINT_HEX(hfsr); FAULT_NEWLINE();
-  FAULT_PRINT("CFSR:    "); FAULT_PRINT_HEX(cfsr); FAULT_NEWLINE();
-  FAULT_PRINT("MMAR:    "); FAULT_PRINT_HEX(mmar); FAULT_NEWLINE();
-  FAULT_PRINT("BFAR:    "); FAULT_PRINT_HEX(bfar); FAULT_NEWLINE();
-  FAULT_PRINT("AFSR:    "); FAULT_PRINT_HEX(afsr); FAULT_NEWLINE();
+    FAULT_PRINTLN("Fault status:");
+    FAULT_PRINT("HFSR:    "); FAULT_PRINT_HEX(hfsr); FAULT_NEWLINE();
+    FAULT_PRINT("CFSR:    "); FAULT_PRINT_HEX(cfsr); FAULT_NEWLINE();
+    FAULT_PRINT("MMAR:    "); FAULT_PRINT_HEX(mmar); FAULT_NEWLINE();
+    FAULT_PRINT("BFAR:    "); FAULT_PRINT_HEX(bfar); FAULT_NEWLINE();
+    FAULT_PRINT("AFSR:    "); FAULT_PRINT_HEX(afsr); FAULT_NEWLINE();
 
-  FAULT_PRINTLN("Other:");
-  FAULT_PRINT("EXC_RETURN: "); FAULT_PRINT_HEX(exc); FAULT_NEWLINE();
+    FAULT_PRINTLN("Other:");
+    FAULT_PRINT("EXC_RETURN: "); FAULT_PRINT_HEX(exc); FAULT_NEWLINE();
 }
 
 static void
