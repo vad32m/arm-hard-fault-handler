@@ -30,7 +30,7 @@
  	                "MRSEQ  R0, MSP;          " \
                     "MRSNE  R0, PSP;          " \
                     "MOV    R1, LR;           " \
-                    "BL     ReportStackUsage; " \
+                    "BL     report_stack_usage; " \
                 );
 
 /* Bit masking. */
@@ -42,14 +42,10 @@
 #define MMFAR        (*((uint32_t*)0xe000ed34))
 #define BFAR         (*((uint32_t*)0xe000ed38))
 #define AFSR         (*((uint32_t*)0xe000ed3c))
-#define DHCSR        (*((uint32_t*)0xe000edf0))
 #define AIRCR        (*((uint32_t*)0xe000ed0c))
 
 /* Application Interrupt and Reset Control Register */
 #define AIRCR_RESETREQ      ((uint32_t)0x05fa0040)
-
-/* Debug Halting Control and Status Register */
-#define DEBUGEN             ((uint8_t)1u)
 
 /* Hard Fault Status Register. */
 #define FORCED              ((uint8_t)30u)
@@ -88,38 +84,38 @@
  * @return  void
  */
 void
-ReportStackUsage(uint32_t *stack_frame, uint32_t exc);
+report_stack_usage(uint32_t *stack_frame, uint32_t exc);
 
 /**
  * @brief  Print data about CFSR bits that relevant to memory management fault
  */
 static void
-ReportMemanageFault(void);
+report_memmanage_fault(void);
 
 /**
  * @brief  Print data about CFSR bits that relevant to bus fault
  */
 static void
-ReportBusFault(void);
+report_bus_fault(void);
 
 /**
  * @brief  Print data about CFSR bits that relevant to usage fault
  */
 static void
-ReportUsageFault(void);
+report_usage_fault(void);
 
 /**
  * @brief  Print data about HFSR bits
  */
 static void
-ReportHardFault(void);
+report_hard_fault(void);
 
 /**
  * @brief Trigger breakpoint if debugger is connected.
  * Infinite loop if no debugger connected.
  */
 static inline void
-HaltExecution(void)
+halt_execution(void)
 {
 #ifdef FAULT_BREAKPOINT
     /* Breakpoint*/
@@ -143,11 +139,11 @@ void
 MEMMANAGE_FAULT_SYMBOL(void)
 {
     REPORT_STACK_FRAME
-    ReportMemanageFault();
+    report_memmanage_fault();
 #ifdef MEMMANAGE_FAULT_HOOK
     MEMMANAGE_FAULT_HOOK()
 #endif
-    HaltExecution();
+    halt_execution();
 }
 #endif
 
@@ -156,14 +152,14 @@ void
 HARD_FAULT_SYMBOL(void)
 {
     REPORT_STACK_FRAME
-    ReportMemanageFault();
-    ReportBusFault();
-    ReportUsageFault();
-    ReportHardFault();
+    report_memmanage_fault();
+    report_bus_fault();
+    report_usage_fault();
+    report_hard_fault();
 #ifdef HARD_FAULT_HOOK
     HARD_FAULT_HOOK()
 #endif
-    HaltExecution();
+    halt_execution();
 }
 #endif
 
@@ -172,11 +168,11 @@ void
 BUS_FAULT_SYMBOL(void)
 {
     REPORT_STACK_FRAME
-    ReportBusFault();
+    report_bus_fault();
 #ifdef BUS_FAULT_HOOK
     BUS_FAULT_HOOK()
 #endif
-    HaltExecution();
+    halt_execution();
 }
 #endif
 
@@ -185,16 +181,16 @@ void
 USAGE_FAULT_SYMBOL(void)
 {
     REPORT_STACK_FRAME
-    ReportUsageFault();
+    report_usage_fault();
 #ifdef USAGE_FAULT_HOOK
     USAGE_FAULT_HOOK()
 #endif
-    HaltExecution();
+    halt_execution();
 }
 #endif
 
 void
-ReportStackUsage(uint32_t *stack_frame, uint32_t exc)
+report_stack_usage(uint32_t *stack_frame, uint32_t exc)
 {
   uint32_t r0   = stack_frame[0];
   uint32_t r1   = stack_frame[1];
@@ -233,7 +229,7 @@ ReportStackUsage(uint32_t *stack_frame, uint32_t exc)
 }
 
 static void
-ReportMemanageFault(void)
+report_memmanage_fault(void)
 {
     uint32_t cfsr = CFSR;
 
@@ -267,7 +263,7 @@ ReportMemanageFault(void)
 }
 
 static void
-ReportBusFault(void)
+report_bus_fault(void)
 {
     uint32_t cfsr = CFSR;
 
@@ -305,7 +301,7 @@ ReportBusFault(void)
 }
 
 static void
-ReportUsageFault(void)
+report_usage_fault(void)
 {
     uint32_t cfsr = CFSR;
 
@@ -337,7 +333,7 @@ ReportUsageFault(void)
 }
 
 static void
-ReportHardFault(void)
+report_hard_fault(void)
 {
     uint32_t hfsr = HFSR;
 
